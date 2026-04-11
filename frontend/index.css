@@ -1,0 +1,371 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Segoe UI', Arial, sans-serif;
+    background-color: #070714;
+    color: #e0e0e0;
+    min-height: 100vh;
+}
+
+header {
+    background: #0d0d1f;
+    padding: 32px 40px;
+    border-bottom: 2px solid #e94560;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+}
+
+header .logo {
+    font-size: 36px;
+    font-weight: 900;
+    color: #e94560;
+    letter-spacing: 2px;
+}
+
+header .logo span {
+    color: white;
+}
+
+header p {
+    font-size: 14px;
+    color: #888;
+    margin-top: 4px;
+}
+
+main {
+    max-width: 1100px;
+    margin: 40px auto;
+    padding: 0 30px;
+    display: flex;
+    flex-direction: column;
+    gap: 28px;
+}
+
+section {
+    background: #0d1b3e;
+    border-radius: 12px;
+    padding: 36px;
+    border: 1px solid #1f3460;
+    transition: border-color 0.3s;
+}
+
+section:hover {
+    border-color: #e94560;
+}
+
+section h2 {
+    font-size: 16px;
+    font-weight: 700;
+    color: #e94560;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    margin-bottom: 20px;
+}
+
+.form-row {
+    display: flex;
+    gap: 16px;
+    margin-bottom: 16px;
+    flex-wrap: wrap;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    flex: 1;
+    min-width: 200px;
+}
+
+.form-group label {
+    font-size: 12px;
+    font-weight: 600;
+    color: #888;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.form-group input {
+    padding: 14px 18px;
+    background: #070714;
+    border: 1px solid #2a4070;
+    border-radius: 6px;
+    font-size: 15px;
+    color: #ffffff;
+    outline: none;
+    transition: border-color 0.2s;
+}
+
+.form-group input:focus {
+    border-color: #e94560;
+}
+
+.form-group input::placeholder {
+    color: #444;
+}
+
+button {
+    padding: 12px 32px;
+    background: #e94560;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s, transform 0.1s, opacity 0.2s;
+    letter-spacing: 0.5px;
+    margin-top: 16px;
+}
+
+button:hover {
+    background: #c73652;
+}
+
+button:active {
+    transform: scale(0.97);
+}
+
+button:disabled {
+    cursor: not-allowed;
+}
+
+button.btn-small {
+    padding: 6px 14px;
+    font-size: 12px;
+    margin-top: 0;
+}
+
+.feedback {
+    margin-top: 12px;
+    font-size: 13px;
+    min-height: 18px;
+    padding: 6px 10px;
+    border-radius: 4px;
+}
+
+.feedback.success {
+    color: #2ecc71;
+    background: rgba(46, 204, 113, 0.1);
+}
+
+.feedback.error {
+    color: #e74c3c;
+    background: rgba(231, 76, 60, 0.1);
+}
+
+.search-row {
+    display: flex;
+    gap: 12px;
+    align-items: flex-end;
+}
+
+.search-row .form-group {
+    flex: 1;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+    font-size: 13px;
+}
+
+thead {
+    background: #0d0d1f;
+}
+thead th[onclick] {
+    cursor: pointer;
+    user-select: none;
+    transition: color 0.2s;
+}
+
+thead th[onclick]:hover {
+    color: #e94560;
+}
+
+th {
+    padding: 14px 16px;
+    text-align: left;
+    color: #aaaaaa;
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    font-weight: 600;
+}
+
+td {
+    padding: 16px;
+    border-bottom: 1px solid #1f3460;
+    color: #dddddd;
+    font-size: 14px;
+}
+
+tbody tr {
+    transition: background 0.15s;
+    animation: fadeIn 0.3s ease forwards;
+}
+
+tbody tr:hover {
+    background: rgba(233, 69, 96, 0.05);
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(6px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+tbody tr:nth-child(1)  { animation-delay: 0.00s; }
+tbody tr:nth-child(2)  { animation-delay: 0.04s; }
+tbody tr:nth-child(3)  { animation-delay: 0.08s; }
+tbody tr:nth-child(4)  { animation-delay: 0.12s; }
+tbody tr:nth-child(5)  { animation-delay: 0.16s; }
+tbody tr:nth-child(6)  { animation-delay: 0.20s; }
+tbody tr:nth-child(7)  { animation-delay: 0.24s; }
+tbody tr:nth-child(8)  { animation-delay: 0.28s; }
+tbody tr:nth-child(9)  { animation-delay: 0.32s; }
+tbody tr:nth-child(10) { animation-delay: 0.36s; }
+
+.avg-rating {
+    display: inline-block;
+    background: rgba(233, 69, 96, 0.15);
+    color: #e94560;
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-weight: 600;
+    font-size: 13px;
+}
+
+.predicted-rating {
+    display: inline-block;
+    background: rgba(46, 204, 113, 0.15);
+    color: #2ecc71;
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-weight: 600;
+    font-size: 13px;
+}
+
+.genre-tag {
+    display: inline-block;
+    background: #1f3460;
+    color: #888;
+    padding: 4px 10px;
+    border-radius: 4px;
+    font-size: 12px;
+    margin: 2px 2px 2px 0;
+}
+
+/* Stars container */
+.stars {
+    display: inline-flex;
+    gap: 2px;
+    vertical-align: middle;
+    margin-left: 6px;
+}
+
+/* Individual star */
+.star {
+    font-size: 16px;
+    line-height: 1;
+    position: relative;
+    color: #333;
+}
+
+/* Full star */
+.star.full {
+    color: #e94560;
+}
+
+/* Half star — χρωματίζει μόνο το αριστερό μισό */
+.star.half {
+    color: #333;
+}
+
+.star.half::before {
+    content: '★';
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 50%;
+    overflow: hidden;
+    color: #e94560;
+}
+
+select {
+    padding: 8px 12px;
+    background: #070714;
+    border: 1px solid #2a4070;
+    border-radius: 4px;
+    font-size: 14px;
+    color: #ffffff;
+    cursor: pointer;
+    outline: none;
+}
+
+select:focus {
+    border-color: #e94560;
+}
+
+#ratings-count {
+    font-size: 15px;
+    color: #888;
+    margin-bottom: 16px;
+}
+
+#rated-count {
+    color: #e94560;
+    font-weight: 700;
+    font-size: 22px;
+    transition: transform 0.2s;
+    display: inline-block;
+}
+
+#rated-count.bump {
+    transform: scale(1.4);
+}
+
+.empty-state {
+    text-align: center;
+    padding: 40px 20px;
+    color: #444;
+}
+
+.empty-state .empty-icon {
+    font-size: 48px;
+    margin-bottom: 12px;
+}
+
+.empty-state p {
+    font-size: 14px;
+    color: #555;
+}
+
+.hidden {
+    display: none;
+}
+
+::-webkit-scrollbar {
+    width: 6px;
+}
+
+::-webkit-scrollbar-track {
+    background: #070714;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #e94560;
+    border-radius: 3px;
+}

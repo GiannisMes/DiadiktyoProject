@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MovieLens App</title>
+    <link rel="stylesheet" href="index.css">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎬</text></svg>"><link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎬</text></svg>">
+</head>
+<body>
+
+    <header>
+        <h1>MovieLens</h1>
+        <p>Search movies, rate them and get personalized recommendations</p>
+    </header>
+
+    <main>
+
+        <!-- Section 1: Add Movie -->
+        <section id="section-add">
+            <h2>Add a New Movie</h2>
+            <div class="form-group">
+                <label for="new-title">Title</label>
+                <input type="text" id="new-title" placeholder="e.g. Inception">
+            </div>
+            <div class="form-group">
+                <label for="new-genres">Genres</label>
+                <input type="text" id="new-genres" placeholder="e.g. Action|Drama|Sci-Fi">
+            </div>
+            <button id="btn-add-movie">Add Movie</button>
+            <p id="add-movie-feedback" class="feedback"></p>
+        </section>
+
+        <!-- Section 2: Search Movies -->
+        <section id="section-search">
+            <h2>Search Movies</h2>
+            <div class="form-group">
+                <label for="search-input">Keyword</label>
+                <input type="text" id="search-input" placeholder="e.g. matrix">
+            </div>
+            <button id="btn-search">Search</button>
+            <p id="search-feedback" class="feedback"></p>
+            <table id="search-results" class="hidden">
+              <thead>
+    <tr>
+        <th onclick="sortTable('movieId')">ID ↕</th>
+        <th onclick="sortTable('title')">Title ↕</th>
+        <th>Genres</th>
+        <th onclick="sortTable('avgRating')">Avg Rating ↕</th>
+        <th>Your Rating</th>
+        <th>Action</th>
+    </tr>
+</thead>
+                <tbody id="search-results-body"></tbody>
+            </table>
+        </section>
+
+    
+        <!-- Section 3 : Recommendations -->
+        <section id="section-recommendations">
+            <h2>Get Recommendations</h2>
+            <p id="ratings-count">You have rated <span id="rated-count">0</span> movies</p>
+            <button id="btn-recommendations">Get Recommendations</button>
+            <p id="recommendations-feedback" class="feedback"></p>
+            <table id="recommendations-results" class="hidden">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Title</th>
+                        <th>Genres</th>
+                        <th>Predicted Rating</th>
+                    </tr>
+                </thead>
+                <tbody id="recommendations-body"></tbody>
+            </table>
+        </section>
+
+    </main>
+
+    <script src="index.js"></script>
+</body>
+</html>

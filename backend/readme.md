@@ -137,12 +137,16 @@ Make sure the backend server is running at `http://localhost:3000` before using 
 
 ## Frontend Features
 
-- Search movies by keyword with paginated results
+- Search movies by keyword with scrollable results table
 - View average rating with star display for each movie
-- Rate movies during the session (stored in browser memory only)
+- Interactive star rating widget (half-star precision, 0.5–5.0) — no dropdown needed
+- Genre filter chips to narrow search results client-side without a new request
 - Sort search results by ID, Title, or Average Rating
+- "Rated this session" collapsible panel showing all rated movies and scores
+- Toast notifications for all user actions (search, rating, add movie, recommendations)
 - Get personalized movie recommendations based on session ratings
 - Add new movies to the database
+- Click outside a section to collapse its results
 
 ## Dataset
 

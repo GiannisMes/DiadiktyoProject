@@ -1,20 +1,34 @@
 const API_BASE = 'http://localhost:3000/movielens/api';
 
 const sessionRatings = {};
+const sessionRatingTitles = {};
 let sortState = { column: null, direction: 'asc' };
 let currentMovies = [];
+let activeGenreFilter = null;
 
+
+// ── Toast notifications ────────────────────────────────────
+
+function showToast(message, isSuccess) {
+    const container = document.getElementById('toast-container');
+    const toast = document.createElement('div');
+    toast.className = 'toast ' + (isSuccess ? 'success' : 'error');
+    toast.textContent = message;
+    container.appendChild(toast);
+    setTimeout(() => {
+        toast.classList.add('toast-out');
+        setTimeout(() => toast.remove(), 300);
+    }, isSuccess ? 3000 : 4500);
+}
 
 // ── Utility functions ──────────────────────────────────────
 
-function setFeedback(elementId, message, isSuccess) {
-    const el = document.getElementById(elementId);
-    el.textContent = message;
-    el.className = 'feedback ' + (isSuccess ? 'success' : 'error');
+function setFeedback(_elementId, message, isSuccess) {
+    showToast(message, isSuccess);
 }
 
 function showTable(tableId) {
-    document.getElementById(tableId).classList.remove('hidden');
+    document.getElementById(tableId + '-wrap').classList.remove('hidden');
 }
 
 function setLoading(buttonId, isLoading, originalText) {
@@ -27,11 +41,11 @@ function setLoading(buttonId, isLoading, originalText) {
 function updateRatedCount() {
     const el = document.getElementById('rated-count');
     el.textContent = Object.keys(sessionRatings).length;
-    // Counter animation
     el.classList.remove('bump');
-    void el.offsetWidth; // force reflow
+    void el.offsetWidth;
     el.classList.add('bump');
     setTimeout(() => el.classList.remove('bump'), 200);
+    updateRatedPanel();
 }
 
 function ratingToStars(rating) {
@@ -50,7 +64,7 @@ function ratingToStars(rating) {
 
 function showEmptyState(tbodyId, message, icon) {
     const tbody = document.getElementById(tbodyId);
-    const colSpan = tbodyId === 'search-results-body' ? 6 : 4;
+    const colSpan = tbodyId === 'search-results-body' ? 5 : 4;
     tbody.innerHTML = `
         <tr>
             <td colspan="${colSpan}">
@@ -88,7 +102,10 @@ function sortTable(column) {
         return 0;
     });
 
-    renderSearchResults(currentMovies);
+    const toRender = activeGenreFilter
+        ? currentMovies.filter(m => m.genres.split('|').map(g => g.trim()).includes(activeGenreFilter))
+        : currentMovies;
+    renderTableRows(toRender);
 }
 
 // ── Section 1: Add Movie ───────────────────────────────────
@@ -144,6 +161,11 @@ document.getElementById('btn-search').addEventListener('click', async () => {
         const response = await fetch(`${API_BASE}/movies?search=${encodeURIComponent(keyword)}`);
         const data = await response.json();
 
+            if (data.status !== 'success' || !data.movies) {
+                setFeedback('search-feedback', 'Server error: ' + (data.detail || 'Invalid response'), false);
+                return;
+            }
+
         showTable('search-results');
 
         if (data.movies.length === 0) {
@@ -153,97 +175,191 @@ document.getElementById('btn-search').addEventListener('click', async () => {
         }
 
         setFeedback('search-feedback', `Found ${data.movies.length} movies.`, true);
-        await renderSearchResults(data.movies);
+        renderSearchResults(data.movies);
 
     } catch (error) {
+            console.error("Search error:", error);
         setFeedback('search-feedback', 'Could not connect to server.', false);
     } finally {
         setLoading('btn-search', false, 'Search');
     }
 });
 
-async function renderSearchResults(movies) {
+function renderSearchResults(movies) {
+    activeGenreFilter = null;
+    currentMovies = movies;
+    renderGenreFilters();
+    renderTableRows(currentMovies);
+}
+
+function renderTableRows(movies) {
     const tbody = document.getElementById('search-results-body');
     tbody.innerHTML = '';
 
-    // Αν είναι νέα αναζήτηση υπολόγισε τα avgRatings
-    if (movies !== currentMovies) {
-        currentMovies = [];
-        for (const movie of movies) {
-            let avgRating = 'N/A';
-            try {
-                const res = await fetch(`${API_BASE}/ratings/${movie.movieId}`);
-                const data = await res.json();
-                if (data.ratings.length > 0) {
-                    const sum = data.ratings.reduce((acc, r) => acc + r.rating, 0);
-                    avgRating = (sum / data.ratings.length).toFixed(2);
-                }
-            } catch (e) {
-                avgRating = 'N/A';
-            }
-            currentMovies.push({ ...movie, avgRating });
-        }
-    }
-
-    // Render
-    for (const movie of currentMovies) {
+    for (const movie of movies) {
         const starsHtml = movie.avgRating !== 'N/A'
             ? ratingToStars(parseFloat(movie.avgRating))
             : '';
-
         const avgBadge = movie.avgRating !== 'N/A'
-            ? `<span class="avg-rating">${movie.avgRating}</span> ${starsHtml}`
-            : '<span style="color:#444">N/A</span>';
-
-        const currentRating = sessionRatings[movie.movieId] || '';
-
-        const genreTags = movie.genres
+            ? `<span class="avg-rating">${movie.avgRating}</span>${starsHtml}`
+            : '<span style="color:#555;font-size:12px">N/A</span>';
+        const genreTags = (movie.genres || '')
             .split('|')
-            .map(g => `<span class="genre-tag">${g}</span>`)
+            .map(g => `<span class="genre-tag">${g.trim()}</span>`)
             .join('');
 
         const row = document.createElement('tr');
         row.innerHTML = `
-            <td style="color:#555">#${movie.movieId}</td>
-            <td style="color:white;font-weight:500">${movie.title}</td>
+            <td class="movie-id">#${movie.movieId}</td>
+            <td class="movie-title">${movie.title}</td>
             <td>${genreTags}</td>
             <td>${avgBadge}</td>
-            <td>
-                <select id="rating-${movie.movieId}">
-                    <option value="">--</option>
-                    <option value="0.5"  ${currentRating == 0.5  ? 'selected' : ''}>0.5</option>
-                    <option value="1.0"  ${currentRating == 1.0  ? 'selected' : ''}>1.0</option>
-                    <option value="1.5"  ${currentRating == 1.5  ? 'selected' : ''}>1.5</option>
-                    <option value="2.0"  ${currentRating == 2.0  ? 'selected' : ''}>2.0</option>
-                    <option value="2.5"  ${currentRating == 2.5  ? 'selected' : ''}>2.5</option>
-                    <option value="3.0"  ${currentRating == 3.0  ? 'selected' : ''}>3.0</option>
-                    <option value="3.5"  ${currentRating == 3.5  ? 'selected' : ''}>3.5</option>
-                    <option value="4.0"  ${currentRating == 4.0  ? 'selected' : ''}>4.0</option>
-                    <option value="4.5"  ${currentRating == 4.5  ? 'selected' : ''}>4.5</option>
-                    <option value="5.0"  ${currentRating == 5.0  ? 'selected' : ''}>5.0</option>
-                </select>
-            </td>
-            <td>
-                <button class="btn-small" onclick="rateMovie(${movie.movieId}, '${movie.title}')">Rate</button>
-            </td>
+            <td>${buildRatingWidget(movie.movieId, movie.title)}</td>
         `;
         tbody.appendChild(row);
     }
+
+    initRatingWidgets();
 }
 
-function rateMovie(movieId, title) {
-    const select = document.getElementById(`rating-${movieId}`);
-    const rating = select.value;
+// ── Genre filter chips ─────────────────────────────────────
 
-    if (!rating) {
-        setFeedback('search-feedback', `Please select a rating for "${title}".`, false);
+function renderGenreFilters() {
+    const bar = document.getElementById('genre-filters');
+    const genres = new Set();
+    currentMovies.forEach(m => (m.genres || '').split('|').forEach(g => genres.add(g.trim())));
+
+    bar.innerHTML = '';
+    bar.classList.remove('hidden');
+
+    const allChip = document.createElement('button');
+    allChip.className = 'genre-chip' + (activeGenreFilter === null ? ' active' : '');
+    allChip.textContent = 'All';
+    allChip.addEventListener('click', () => {
+        activeGenreFilter = null;
+        renderGenreFilters();
+        renderTableRows(currentMovies);
+    });
+    bar.appendChild(allChip);
+
+    [...genres].sort().forEach(genre => {
+        const chip = document.createElement('button');
+        chip.className = 'genre-chip' + (activeGenreFilter === genre ? ' active' : '');
+        chip.textContent = genre;
+        chip.addEventListener('click', () => {
+            activeGenreFilter = genre;
+            const filtered = currentMovies.filter(m =>
+                (m.genres || '').split('|').map(g => g.trim()).includes(genre)
+            );
+            renderGenreFilters();
+            renderTableRows(filtered);
+        });
+        bar.appendChild(chip);
+    });
+}
+
+function buildRatingWidget(movieId, title) {
+    let html = `<div class="rating-widget" data-mid="${movieId}" data-title="${(title || '').replace(/"/g, '&quot;')}">`;
+    for (let i = 1; i <= 5; i++) {
+        html += `<span class="rw-star" data-full="${i}" data-half="${i - 0.5}">` +
+                `<span class="rw-l" data-val="${i - 0.5}"></span>` +
+                `<span class="rw-r" data-val="${i}"></span>` +
+                `★</span>`;
+    }
+    html += `</div>`;
+    return html;
+}
+
+function highlightWidget(movieId, val) {
+    const widget = document.querySelector(`.rating-widget[data-mid="${movieId}"]`);
+    if (!widget) return;
+    widget.querySelectorAll('.rw-star').forEach(star => {
+        const full = parseFloat(star.dataset.full);
+        const half = parseFloat(star.dataset.half);
+        star.classList.remove('rw-full', 'rw-half');
+        if (val >= full)      star.classList.add('rw-full');
+        else if (val >= half) star.classList.add('rw-half');
+    });
+}
+
+function initRatingWidgets() {
+    document.querySelectorAll('.rating-widget').forEach(widget => {
+        const movieId = parseInt(widget.dataset.mid);
+        const title   = widget.dataset.title;
+
+        // Restore saved rating on init
+        highlightWidget(movieId, sessionRatings[movieId] || 0);
+
+        widget.querySelectorAll('.rw-l, .rw-r').forEach(zone => {
+            zone.addEventListener('mouseenter', () => {
+                highlightWidget(movieId, parseFloat(zone.dataset.val));
+            });
+
+            zone.addEventListener('click', () => {
+                const val = parseFloat(zone.dataset.val);
+                sessionRatings[movieId] = val;
+                sessionRatingTitles[movieId] = title;
+                highlightWidget(movieId, val);
+                updateRatedCount();
+                showToast(`Rated "${title}" — ${val} stars`, true);
+            });
+        });
+
+        widget.addEventListener('mouseleave', () => {
+            highlightWidget(movieId, sessionRatings[movieId] || 0);
+        });
+    });
+}
+
+
+// ── Rated this session panel ───────────────────────────────
+
+function updateRatedPanel() {
+    const body  = document.getElementById('rated-panel-body');
+    const badge = document.getElementById('rated-panel-badge');
+    const entries = Object.entries(sessionRatings);
+
+    badge.textContent = entries.length;
+
+    if (entries.length === 0) {
+        body.innerHTML = '<p class="rated-panel-empty">No ratings yet.</p>';
         return;
     }
 
-    sessionRatings[movieId] = parseFloat(rating);
-    updateRatedCount();
-    setFeedback('search-feedback', `Rated "${title}" with ${rating} stars.`, true);
+    body.innerHTML = entries.map(([id, rating]) => {
+        const t = sessionRatingTitles[id] || `Movie #${id}`;
+        return `<div class="rated-panel-item">
+            <span class="rated-panel-title" title="${t}">${t}</span>
+            <span class="rated-panel-score">${rating} ★</span>
+        </div>`;
+    }).join('');
 }
+
+document.getElementById('rated-panel-toggle').addEventListener('click', (e) => {
+    e.stopPropagation();
+    document.getElementById('rated-panel-body').classList.toggle('hidden');
+});
+
+document.addEventListener('click', (e) => {
+    // Rated panel: close when clicking outside
+    const panel = document.getElementById('rated-panel');
+    if (!panel.contains(e.target)) {
+        document.getElementById('rated-panel-body').classList.add('hidden');
+    }
+
+    // Search section: reset when clicking outside
+    const searchSection = document.getElementById('section-search');
+    if (!searchSection.contains(e.target)) {
+        document.getElementById('search-results-wrap').classList.add('hidden');
+        document.getElementById('genre-filters').classList.add('hidden');
+    }
+
+    // Recommendations section: reset when clicking outside
+    const recoSection = document.getElementById('section-recommendations');
+    if (!recoSection.contains(e.target)) {
+        document.getElementById('recommendations-results-wrap').classList.add('hidden');
+    }
+});
 
 // ── Section 3: Recommendations ─────────────────────────────
 
@@ -271,7 +387,7 @@ document.getElementById('btn-recommendations').addEventListener('click', async (
 
         if (data.recommendations.length === 0) {
             setFeedback('recommendations-feedback', 'No recommendations found. Try rating more movies.', false);
-            showEmptyState('recommendations-body', 'No recommendations found. Try rating more movies!', '🎯');
+            showEmptyState('recommendations-body', 'No recommendations found. Try rating more movies!',':(');
             return;
         }
 
@@ -297,8 +413,8 @@ function renderRecommendations(recommendations) {
 
         const row = document.createElement('tr');
         row.innerHTML = `
-            <td style="color:#555">#${movie.movieId}</td>
-            <td style="color:white;font-weight:500">${movie.title}</td>
+            <td class="movie-id">#${movie.movieId}</td>
+            <td class="movie-title">${movie.title}</td>
             <td>${genreTags}</td>
             <td>
                 <span class="predicted-rating">${movie.predictedRating}</span>

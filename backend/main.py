@@ -26,11 +26,35 @@ def search_movies(search: str = ""):
     try:
         conn = get_db()
         cursor = conn.cursor()
-        cursor.execute(
-            "SELECT * FROM movies WHERE LOWER(title) LIKE LOWER(?)",
+        cursor.execute("""
+            SELECT
+                m.movieId,
+                m.title,
+                m.genres,
+                ROUND(AVG(r.rating), 2) AS avgRating
+            FROM
+                movies AS m
+            LEFT JOIN
+                ratings AS r ON m.movieId = r.movieId
+            WHERE
+                LOWER(m.title) LIKE LOWER(?)
+            GROUP BY
+                m.movieId, m.title, m.genres
+            ORDER BY
+                m.movieId
+            """,
             (f"%{search}%",)
         )
-        movies = [dict(row) for row in cursor.fetchall()]
+        movies_raw = cursor.fetchall()
+        movies = []
+        for row in movies_raw:
+            movie_dict = dict(row)
+            
+            # Safely retrieve avgRating regardless of SQLite driver case-sensitivity
+            avg = movie_dict.get('avgRating', movie_dict.get('avgrating'))
+            movie_dict['avgRating'] = 'N/A' if avg is None else avg
+
+            movies.append(movie_dict)
         conn.close()
         return {"status": "success", "movies": movies}
     except Exception as e:

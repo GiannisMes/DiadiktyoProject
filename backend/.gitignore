@@ -3,4 +3,4 @@ backend/movielens.db
 backend/ml-latest-small/
 backend/ml-latest-small.zip
 __pycache__/
-*.pyc
+*.pycgi

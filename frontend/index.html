@@ -3,79 +3,123 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MovieLens App</title>
+    <title>MovieLens</title>
     <link rel="stylesheet" href="index.css">
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎬</text></svg>"><link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎬</text></svg>">
 </head>
 <body>
 
     <header>
-        <h1>MovieLens</h1>
-        <p>Search movies, rate them and get personalized recommendations</p>
+        <div class="header-inner">
+            <div class="logo">
+                <svg class="logo-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="10"/>
+                    <polygon points="10,8 16,12 10,16" fill="currentColor" stroke="none"/>
+                </svg>
+                <span>Movie<strong>Lens</strong></span>
+            </div>
+            <span class="header-divider"></span>
+            <p class="tagline">Search movies, rate them, get recommendations</p>
+        </div>
     </header>
 
     <main>
 
-        <!-- Section 1: Add Movie -->
-        <section id="section-add">
-            <h2>Add a New Movie</h2>
-            <div class="form-group">
-                <label for="new-title">Title</label>
-                <input type="text" id="new-title" placeholder="e.g. Inception">
-            </div>
-            <div class="form-group">
-                <label for="new-genres">Genres</label>
-                <input type="text" id="new-genres" placeholder="e.g. Action|Drama|Sci-Fi">
-            </div>
-            <button id="btn-add-movie">Add Movie</button>
-            <p id="add-movie-feedback" class="feedback"></p>
-        </section>
-
-        <!-- Section 2: Search Movies -->
+        <!-- Section 1: Search Movies -->
         <section id="section-search">
-            <h2>Search Movies</h2>
-            <div class="form-group">
-                <label for="search-input">Keyword</label>
-                <input type="text" id="search-input" placeholder="e.g. matrix">
+            <div class="section-header">
+                <h2>Search Movies</h2>
+                <p class="section-desc">Find any movie by title or keyword</p>
             </div>
-            <button id="btn-search">Search</button>
-            <p id="search-feedback" class="feedback"></p>
-            <table id="search-results" class="hidden">
-              <thead>
-    <tr>
-        <th onclick="sortTable('movieId')">ID ↕</th>
-        <th onclick="sortTable('title')">Title ↕</th>
-        <th>Genres</th>
-        <th onclick="sortTable('avgRating')">Avg Rating ↕</th>
-        <th>Your Rating</th>
-        <th>Action</th>
-    </tr>
-</thead>
-                <tbody id="search-results-body"></tbody>
-            </table>
+            <div id="search-feedback" class="feedback"></div>
+
+            <div class="search-bar">
+                <input type="text" id="search-input" placeholder="e.g. Inception, Matrix, Star Wars...">
+                <button id="btn-search">Search</button>
+            </div>
+
+            <div id="genre-filters" class="genre-filter-bar hidden"></div>
+
+            <div class="table-wrap hidden" id="search-results-wrap">
+                <table id="search-results">
+                    <thead>
+                        <tr>
+                            <th onclick="sortTable('movieId')">ID <span class="sort-icon">↕</span></th>
+                            <th onclick="sortTable('title')">Title <span class="sort-icon">↕</span></th>
+                            <th>Genres</th>
+                            <th onclick="sortTable('avgRating')">Avg Rating <span class="sort-icon">↕</span></th>
+                            <th>Your Rating</th>
+                        </tr>
+                    </thead>
+                    <tbody id="search-results-body"></tbody>
+                </table>
+            </div>
         </section>
 
-    
-        <!-- Section 3 : Recommendations -->
-        <section id="section-recommendations">
-            <h2>Get Recommendations</h2>
-            <p id="ratings-count">You have rated <span id="rated-count">0</span> movies</p>
-            <button id="btn-recommendations">Get Recommendations</button>
-            <p id="recommendations-feedback" class="feedback"></p>
-            <table id="recommendations-results" class="hidden">
-                <thead>
-                    <tr>
-                        <th>ID</th>
-                        <th>Title</th>
-                        <th>Genres</th>
-                        <th>Predicted Rating</th>
-                    </tr>
-                </thead>
-                <tbody id="recommendations-body"></tbody>
-            </table>
-        </section>
+        <div class="bottom-grid">
 
+            <!-- Section 2: Add Movie -->
+            <section id="section-add">
+                <div class="section-header">
+                    <h2>Add a Movie</h2>
+                    <p class="section-desc">Add a new title to the database</p>
+                </div>
+
+                <div class="form-group">
+                    <label for="new-title">Title</label>
+                    <input type="text" id="new-title" placeholder="e.g. Inception (2010)">
+                </div>
+                <div class="form-group">
+                    <label for="new-genres">Genres</label>
+                    <input type="text" id="new-genres" placeholder="e.g. Action|Drama|Sci-Fi">
+                    <span class="field-hint">Separate genres with a pipe character  |</span>
+                </div>
+
+                <button id="btn-add-movie">Add Movie</button>
+                <div id="add-movie-feedback" class="feedback"></div>
+            </section>
+
+            <!-- Section 3: Recommendations -->
+            <section id="section-recommendations">
+                <div class="section-header">
+                    <h2>Recommendations</h2>
+                    <p class="section-desc">Personalised picks based on your ratings</p>
+                </div>
+
+                <p id="ratings-count">Movies rated this session: <span id="rated-count">0</span></p>
+                <p class="field-hint">Rate movies from the search results, then click the button below.</p>
+
+                <button id="btn-recommendations" style="margin-top: 24px;">Get Recommendations</button>
+                <div id="recommendations-feedback" class="feedback"></div>
+
+                <div class="table-wrap hidden" id="recommendations-results-wrap">
+                    <table id="recommendations-results">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Title</th>
+                                <th>Genres</th>
+                                <th>Predicted Rating</th>
+                            </tr>
+                        </thead>
+                        <tbody id="recommendations-body"></tbody>
+                    </table>
+                </div>
+            </section>
+
+        </div>
     </main>
+
+    <!-- Rated this session panel (bottom-left) -->
+    <div id="rated-panel">
+        <div id="rated-panel-body" class="hidden"></div>
+        <button id="rated-panel-toggle">
+            <span>Rated this session</span>
+            <span id="rated-panel-badge">0</span>
+        </button>
+    </div>
+
+    <!-- Toast container (bottom-right) -->
+    <div id="toast-container"></div>
 
     <script src="index.js"></script>
 </body>

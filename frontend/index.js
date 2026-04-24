@@ -148,7 +148,17 @@ document.getElementById('btn-add-movie').addEventListener('click', async () => {
 
 // ── Section 2: Search Movies ───────────────────────────────
 
-document.getElementById('btn-search').addEventListener('click', async () => {
+document.getElementById('btn-search').addEventListener('click', (e) => {
+    e.stopPropagation();
+    performSearch();
+});
+
+document.getElementById('search-input').addEventListener('keypress', (e) => {
+    e.stopPropagation();
+    if (e.key === 'Enter') performSearch();
+});
+
+async function performSearch() {
     const keyword = document.getElementById('search-input').value.trim();
 
     if (!keyword) {
@@ -183,7 +193,7 @@ document.getElementById('btn-search').addEventListener('click', async () => {
     } finally {
         setLoading('btn-search', false, 'Search');
     }
-});
+}
 
 function renderSearchResults(movies) {
     activeGenreFilter = null;
@@ -235,7 +245,8 @@ function renderGenreFilters() {
     const allChip = document.createElement('button');
     allChip.className = 'genre-chip' + (activeGenreFilter === null ? ' active' : '');
     allChip.textContent = 'All';
-    allChip.addEventListener('click', () => {
+    allChip.addEventListener('click', (e) => {
+        e.stopPropagation();
         activeGenreFilter = null;
         renderGenreFilters();
         renderTableRows(currentMovies);
@@ -246,7 +257,8 @@ function renderGenreFilters() {
         const chip = document.createElement('button');
         chip.className = 'genre-chip' + (activeGenreFilter === genre ? ' active' : '');
         chip.textContent = genre;
-        chip.addEventListener('click', () => {
+        chip.addEventListener('click', (e) => {
+            e.stopPropagation();
             activeGenreFilter = genre;
             const filtered = currentMovies.filter(m =>
                 (m.genres || '').split('|').map(g => g.trim()).includes(genre)
@@ -291,11 +303,13 @@ function initRatingWidgets() {
         highlightWidget(movieId, sessionRatings[movieId] || 0);
 
         widget.querySelectorAll('.rw-l, .rw-r').forEach(zone => {
-            zone.addEventListener('mouseenter', () => {
+            zone.addEventListener('mouseenter', (e) => {
+                e.stopPropagation();
                 highlightWidget(movieId, parseFloat(zone.dataset.val));
             });
 
-            zone.addEventListener('click', () => {
+            zone.addEventListener('click', (e) => {
+                e.stopPropagation();
                 const val = parseFloat(zone.dataset.val);
                 sessionRatings[movieId] = val;
                 sessionRatingTitles[movieId] = title;
@@ -305,7 +319,8 @@ function initRatingWidgets() {
             });
         });
 
-        widget.addEventListener('mouseleave', () => {
+        widget.addEventListener('mouseleave', (e) => {
+            e.stopPropagation();
             highlightWidget(movieId, sessionRatings[movieId] || 0);
         });
     });

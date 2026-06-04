@@ -2,6 +2,8 @@
 
 A web application for exploring the MovieLens Latest Small dataset, rating movies, and getting personalized recommendations.
 
+**GitHub Repository:** https://github.com/GiannisMes/DiadiktyoProject
+
 ## Prerequisites
 
 - Python 3.8+
